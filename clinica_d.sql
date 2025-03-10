@@ -1,0 +1,26 @@
+CREATE DATABASE IF NOT EXISTS consultorio_dental;
+USE consultorio_dental;
+
+CREATE TABLE IF NOT EXISTS facturas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  fecha DATE NOT NULL,
+  cliente VARCHAR(100) NOT NULL,
+  servicio VARCHAR(100) NOT NULL,
+  total DECIMAL(10,2) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS albaranes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  fecha DATE NOT NULL,
+  proveedor VARCHAR(100) NOT NULL,
+  cantidad INT NOT NULL,
+  descripcion VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS compras (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  cliente VARCHAR(100) NOT NULL,
+  producto VARCHAR(100) NOT NULL,
+  fecha DATE NOT NULL,
+  monto DECIMAL(10,2) NOT NULL
+);
