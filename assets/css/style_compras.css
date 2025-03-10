@@ -1,0 +1,55 @@
+/* Ejemplo de estilos personalizados */
+/* .index_compras {
+    background-color: #C0C0C0;
+}
+
+.classf_compras {
+    background-color: #C0C0C0;
+} */
+
+/* Botón primario personalizado */
+.mi-boton-personalizado {
+    background-color: #0021f3 !important; /* Color de fondo */
+    color: #ffffff !important;           /* Color del texto */
+    border-color: #0021f3 !important;    /* Borde (opcional) */
+}
+
+/* Botón success personalizado */
+.mi-boton-success-personalizado {
+    background-color: #50C878 !important; /* Color de fondo */
+    color: #000000 !important;            /* Color del texto */
+    border-color: #50C878 !important;     /* Borde (opcional) */
+}
+
+/* Títulos personalizado */
+.mi-titulo-personalizado2 {
+    color: #333333;
+    text-decoration: underline;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.mi-titulo-personalizado {
+    color: #333333;
+    text-decoration: underline;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+/* Tabla personalizada */
+.mi-tabla-personalizada thead {
+    background-color: aqua !important; 
+}
+
+.mi-tabla-personalizada th, 
+.mi-tabla-personalizada td {
+    vertical-align: middle !important;
+    text-align: center;
+    border: 4px solid black !important;
+}
+
+.mi-tabla-personalizada td {
+    background-color: #C0C0C0 !important;
+}
