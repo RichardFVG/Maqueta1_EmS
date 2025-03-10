@@ -26,12 +26,19 @@
           </a>
         </li>
         
-        <!-- Compras (clasificación) -->
+        <!-- Compras -->
         <li class="nav-item">
-          <a class="nav-link" 
-             href="index.php?controller=Compra&action=index">
-             Clasificación Compras
-          </a>
+            <a class="nav-link"
+                href="index.php?controller=Compra&action=index">
+                Listado Compras
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link"
+                href="index.php?controller=Compra&action=classification">
+                Clasificación Compras
+            </a>
         </li>
         
         <!-- Listado con Filtro de Fechas -->
