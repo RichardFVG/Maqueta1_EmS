@@ -8,7 +8,16 @@ class AlbaranController extends BaseController {
         $albaranes = $albaran->getAll();
         $this->renderView('albaran/index', ['albaranes' => $albaranes]);
     }
+//Generar resumen de albaránes 
 
+
+public function generateSummary(){
+    $albaran = new Albaran();
+    $albaranes = $albaran->getAll();
+    $this->renderView('albaran/summary', ['albaranes' => $albaranes]);
+
+   // header("Location: summary.php?controller=Albaran&action=summae");
+}
     // Crear albarán
     public function create() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {

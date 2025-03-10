@@ -1,9 +1,7 @@
-<div class="row classf_compra">
+<div class="row">
     <div class="col-12">
-        <!-- Agregamos una clase personalizada al título -->
-        <h2 class="mi-titulo-personalizado">Clasificación de Compras por Cliente</h2>
-        
-        <table class="table table-bordered mi-tabla-personalizada">
+        <h2>Clasificación de Compras por Cliente</h2>
+        <table class="table table-bordered">
             <thead>
                 <tr>
                     <th>Cliente</th>

@@ -2,6 +2,7 @@
     <div class="col-12">
         <h2>Listado de Albaranes</h2>
         <a href="index.php?controller=Albaran&action=create" class="btn btn-primary mb-3">Crear Albarán</a>
+        <a href="index.php?controller=Albaran&action=generateSummary" class="btn btn-primary mb-3">Generar Historial</a>
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -40,5 +41,7 @@
                 <?php endif; ?>
             </tbody>
         </table>
+
+            
     </div>
 </div>
