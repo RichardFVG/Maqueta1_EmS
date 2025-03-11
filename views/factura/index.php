@@ -40,9 +40,6 @@
                     <tr><td colspan="6">No hay facturas registradas.</td></tr>
                 <?php endif; ?>
             </tbody>
-        </table>
-
-       
-
+        </table>   
     </div>
 </div>
