@@ -2,17 +2,23 @@
     <div class="col-12">
         <h2>Historial de Albaranes</h2>
 
-        <!-- Pequeño resumen o "stats" -->
-        <p>
-            <strong>Total de Albaranes:</strong> <?= $totalAlbaranes; ?><br>
-            <strong>Suma de Cantidades:</strong> <?= $sumaCantidad; ?>
-        </p>
-
-        <!-- Botón de descarga XLS -->
-        <a href="index.php?controller=Albaran&action=downloadSummaryXls" 
-           class="btn btn-success mb-3">
-            Descargar XLS
-        </a>
+        <!-- Creamos una fila con dos columnas: 
+             - La primera (col-6) muestra las estadísticas
+             - La segunda (col-6) alinea el botón a la derecha -->
+        <div class="row mb-3">
+            <div class="col-6">
+                <p>
+                    <strong>Total de Albaranes:</strong> <?= $totalAlbaranes; ?><br>
+                    <strong>Suma de Cantidades:</strong> <?= $sumaCantidad; ?>
+                </p>
+            </div>
+            <div class="col-6 text-end">
+                <a href="index.php?controller=Albaran&action=downloadSummaryXls" 
+                   class="btn btn-success">
+                   Descargar XLS
+                </a>
+            </div>
+        </div>
 
         <?php if(!empty($albaranes)): ?>
             <table class="table table-bordered">
