@@ -1,25 +1,27 @@
 <?php
 require_once 'BaseController.php';
 
+// (NUEVO) Importamos las clases de PhpSpreadsheet
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xls;
+
 class CompraController extends BaseController {
 
     // 1) Listar todas las compras
     public function index() {
         $compra = new Compra();
-        $compras = $compra->getAll(); // Todas las compras
+        $compras = $compra->getAll();
         $this->renderView('compra/index', ['compras' => $compras]);
     }
 
     // 2) Crear compra
     public function create() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Recogemos datos del formulario
             $cliente = $_POST['cliente'];
             $producto = $_POST['producto'];
             $fecha = $_POST['fecha'];
             $monto = $_POST['monto'];
 
-            // Guardamos en BD
             $compra = new Compra();
             $compra->setCliente($cliente);
             $compra->setProducto($producto);
@@ -27,10 +29,8 @@ class CompraController extends BaseController {
             $compra->setMonto($monto);
             $compra->save();
 
-            // Redirigimos al listado de compras
             header("Location: index.php?controller=Compra&action=index");
         } else {
-            // Mostramos formulario de creación
             $this->renderView('compra/create');
         }
     }
@@ -43,7 +43,6 @@ class CompraController extends BaseController {
             $compraActual = $compra->getOne();
 
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                // Actualizamos datos
                 $cliente = $_POST['cliente'];
                 $producto = $_POST['producto'];
                 $fecha = $_POST['fecha'];
@@ -55,14 +54,11 @@ class CompraController extends BaseController {
                 $compra->setMonto($monto);
                 $compra->update();
 
-                // Redirigimos al listado
                 header("Location: index.php?controller=Compra&action=index");
             } else {
-                // Mostrar formulario de edición
                 $this->renderView('compra/edit', ['compra' => $compraActual]);
             }
         } else {
-            // Si no hay ID, volvemos al listado
             header("Location: index.php?controller=Compra&action=index");
         }
     }
@@ -77,28 +73,48 @@ class CompraController extends BaseController {
         header("Location: index.php?controller=Compra&action=index");
     }
 
-    // 5) Descargar todas las compras en formato XLS
+    // (MODIFICADO) 5) Descargar todas las compras en .xls real
     public function downloadXls() {
         $compra = new Compra();
         $compras = $compra->getAll();
 
-        // Cabeceras para forzar la descarga
-        header("Content-Type: application/vnd.ms-excel");
-        header("Content-Disposition: attachment; filename=compras.xls");
-        header("Pragma: no-cache");
-        header("Expires: 0");
+        // 1) Crear Spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Compras');
 
-        // Encabezados de columna
-        echo "ID\tCliente\tProducto\tFecha\tMonto\n";
+        // 2) Encabezados
+        $sheet->setCellValue('A1', 'ID');
+        $sheet->setCellValue('B1', 'Cliente');
+        $sheet->setCellValue('C1', 'Producto');
+        $sheet->setCellValue('D1', 'Fecha');
+        $sheet->setCellValue('E1', 'Monto');
 
-        // Filas
+        // 3) Llenar filas
+        $rowNumber = 2;
         foreach ($compras as $c) {
-            echo $c['id']."\t".
-                 $c['cliente']."\t".
-                 $c['producto']."\t".
-                 $c['fecha']."\t".
-                 $c['monto']."\n";
+            $sheet->setCellValue('A'.$rowNumber, $c['id']);
+            $sheet->setCellValue('B'.$rowNumber, $c['cliente']);
+            $sheet->setCellValue('C'.$rowNumber, $c['producto']);
+            $sheet->setCellValue('D'.$rowNumber, $c['fecha']);
+            $sheet->setCellValue('E'.$rowNumber, $c['monto']);
+            $rowNumber++;
         }
+
+        // 4) Ajustar anchos (opcional)
+        foreach (['A','B','C','D','E'] as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // 5) Forzar descarga
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment; filename="compras.xls"');
+        header('Cache-Control: max-age=0');
+
+        // 6) Generamos el archivo y lo enviamos al navegador
+        $writer = new Xls($spreadsheet);
+        $writer->save('php://output');
+        exit;
     }
 
     // 6) Clasificación de compras por cliente

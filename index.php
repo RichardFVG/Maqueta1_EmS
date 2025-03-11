@@ -1,6 +1,9 @@
 <?php
 session_start();
 
+// (NUEVO) Cargamos el autoload de Composer para usar PhpSpreadsheet
+require_once __DIR__ . '/vendor/autoload.php';
+
 // Requerimos la configuración de base de datos
 require_once 'config/database.php';
 
@@ -17,15 +20,14 @@ require_once 'controllers/FacturaController.php';
 require_once 'controllers/AlbaranController.php';
 require_once 'controllers/CompraController.php';
 
-// Obtenemos el nombre del controlador y la acción desde la URL (GET)
-// Ej: index.php?controller=Factura&action=index
+// Obtenemos el nombre del controlador y la acción
 $controllerName = isset($_GET['controller']) ? $_GET['controller'].'Controller' : 'FacturaController';
 $actionName = isset($_GET['action']) ? $_GET['action'] : 'index';
 
-// Verificamos que la clase controlador exista
+// Verificamos la existencia del controlador
 if (class_exists($controllerName)) {
     $controller = new $controllerName();
-    // Verificamos que el método (acción) exista
+    // Verificamos la existencia del método (acción)
     if (method_exists($controller, $actionName)) {
         $controller->$actionName();
     } else {

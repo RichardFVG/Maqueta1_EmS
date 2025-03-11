@@ -1,6 +1,10 @@
 <?php
 require_once 'BaseController.php';
 
+// (NUEVO) Importamos las clases de PhpSpreadsheet
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xls;
+
 class AlbaranController extends BaseController {
     // Listado
     public function index() {
@@ -14,14 +18,13 @@ class AlbaranController extends BaseController {
         $albaran = new Albaran();
         $albaranes = $albaran->getAll();
 
-        // Cálculo de totales (suma de cantidades, cantidad de albaranes)
+        // Cálculo de totales
         $totalAlbaranes = count($albaranes);
         $sumaCantidad = 0;
         foreach ($albaranes as $a) {
             $sumaCantidad += $a['cantidad'];
         }
 
-        // Renderizar la nueva vista summary
         $this->renderView('albaran/summary', [
             'albaranes' => $albaranes,
             'totalAlbaranes' => $totalAlbaranes,
@@ -29,7 +32,7 @@ class AlbaranController extends BaseController {
         ]);
     }
 
-    // Descargar XLS con el historial de albaranes
+    // (MODIFICADO) Descargar XLS real con el historial de albaranes
     public function downloadSummaryXls() {
         $albaran = new Albaran();
         $albaranes = $albaran->getAll();
@@ -41,31 +44,50 @@ class AlbaranController extends BaseController {
             $sumaCantidad += $a['cantidad'];
         }
 
-        // Cabeceras para forzar la descarga
-        header("Content-Type: application/vnd.ms-excel");
-        header("Content-Disposition: attachment; filename=historial_albaranes.xls");
-        header("Pragma: no-cache");
-        header("Expires: 0");
+        // 1) Crear la hoja de cálculo
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Historial Albaranes');
 
-        // Encabezados de columnas en la hoja Excel
-        // También se puede agregar un título previo, etc.
-        echo "ID\tFecha\tProveedor\tCantidad\tDescripción\n";
+        // 2) Cabeceras en la fila 1
+        $sheet->setCellValue('A1', 'ID');
+        $sheet->setCellValue('B1', 'Fecha');
+        $sheet->setCellValue('C1', 'Proveedor');
+        $sheet->setCellValue('D1', 'Cantidad');
+        $sheet->setCellValue('E1', 'Descripción');
 
-        // Filas de datos
-        if(!empty($albaranes)){
-            foreach ($albaranes as $row) {
-                echo $row['id']."\t".
-                     $row['fecha']."\t".
-                     $row['proveedor']."\t".
-                     $row['cantidad']."\t".
-                     $row['descripcion']."\n";
-            }
+        // 3) Llenamos las filas con los datos
+        $rowNumber = 2;
+        foreach ($albaranes as $row) {
+            $sheet->setCellValue('A'.$rowNumber, $row['id']);
+            $sheet->setCellValue('B'.$rowNumber, $row['fecha']);
+            $sheet->setCellValue('C'.$rowNumber, $row['proveedor']);
+            $sheet->setCellValue('D'.$rowNumber, $row['cantidad']);
+            $sheet->setCellValue('E'.$rowNumber, $row['descripcion']);
+            $rowNumber++;
         }
 
-        // Podemos agregar un salto de línea y totales al final del archivo
-        echo "\n";  // salto
-        echo "Total Albaranes:\t$totalAlbaranes\n";
-        echo "Suma Cantidad:\t$sumaCantidad\n";
+        // 4) Agregar totales (opcional)
+        $sheet->setCellValue('A'.($rowNumber + 1), 'Total Albaranes:');
+        $sheet->setCellValue('B'.($rowNumber + 1), $totalAlbaranes);
+
+        $sheet->setCellValue('A'.($rowNumber + 2), 'Suma Cantidades:');
+        $sheet->setCellValue('B'.($rowNumber + 2), $sumaCantidad);
+
+        // 5) Ajustar anchos (opcional)
+        foreach (['A','B','C','D','E'] as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // 6) Cabeceras para forzar la descarga como .xls real
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment; filename="historial_albaranes.xls"');
+        header('Cache-Control: max-age=0');
+
+        // 7) Crear el writer y enviar
+        $writer = new Xls($spreadsheet);
+        $writer->save('php://output');
+        exit;
     }
 
     // Crear albarán

@@ -1,6 +1,10 @@
 <?php
 require_once 'BaseController.php';
 
+// (NUEVO) Importamos las clases de PhpSpreadsheet
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xls;
+
 class FacturaController extends BaseController {
     
     // Muestra la lista de facturas
@@ -13,13 +17,11 @@ class FacturaController extends BaseController {
     // Crear factura (formulario y guardado)
     public function create() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            // Recogemos datos del formulario
             $fecha = $_POST['fecha'];
             $cliente = $_POST['cliente'];
             $servicio = $_POST['servicio'];
             $total = $_POST['total'];
 
-            // Guardamos en BD
             $factura = new Factura();
             $factura->setFecha($fecha);
             $factura->setCliente($cliente);
@@ -27,10 +29,8 @@ class FacturaController extends BaseController {
             $factura->setTotal($total);
             $factura->save();
 
-            // Redireccionamos al listado
             header("Location: index.php?controller=Factura&action=index");
         } else {
-            // Mostramos formulario de creación
             $this->renderView('factura/create');
         }
     }
@@ -43,7 +43,6 @@ class FacturaController extends BaseController {
             $facturaActual = $factura->getOne();
 
             if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-                // Actualizamos datos
                 $fecha = $_POST['fecha'];
                 $cliente = $_POST['cliente'];
                 $servicio = $_POST['servicio'];
@@ -55,14 +54,11 @@ class FacturaController extends BaseController {
                 $factura->setTotal($total);
                 $factura->update();
 
-                // Redireccionar tras actualizar
                 header("Location: index.php?controller=Factura&action=index");
             } else {
-                // Mostrar formulario de edición
                 $this->renderView('factura/edit', ['factura' => $facturaActual]);
             }
         } else {
-            // Si no hay ID, volvemos a la lista
             header("Location: index.php?controller=Factura&action=index");
         }
     }
@@ -77,30 +73,53 @@ class FacturaController extends BaseController {
         header("Location: index.php?controller=Factura&action=index");
     }
 
-    // Descargar facturas en formato XLS
+    // (MODIFICADO) Descargar facturas en verdadero formato XLS con PhpSpreadsheet
     public function downloadXls() {
+        // 1) Obtenemos los datos de la BD
         $factura = new Factura();
         $facturas = $factura->getAll();
 
-        // Cabeceras para forzar la descarga
-        header("Content-Type: application/vnd.ms-excel");
-        header("Content-Disposition: attachment; filename=facturas.xls");
-        header("Pragma: no-cache");
-        header("Expires: 0");
+        // 2) Creamos la hoja de cálculo
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Facturas');
 
-        // Encabezados de columna
-        echo "ID\tFecha\tCliente\tServicio\tTotal\n";
-        // Filas
-        foreach ($facturas as $f) {
-            echo $f['id']."\t".
-                 $f['fecha']."\t".
-                 $f['cliente']."\t".
-                 $f['servicio']."\t".
-                 $f['total']."\n";
+        // 3) Cabeceras en la primera fila
+        $sheet->setCellValue('A1', 'ID');
+        $sheet->setCellValue('B1', 'Fecha');
+        $sheet->setCellValue('C1', 'Cliente');
+        $sheet->setCellValue('D1', 'Servicio');
+        $sheet->setCellValue('E1', 'Total');
+
+        // 4) Insertar filas
+        $rowNumber = 2;
+        foreach ($facturas as $fact) {
+            $sheet->setCellValue('A'.$rowNumber, $fact['id']);
+            $sheet->setCellValue('B'.$rowNumber, $fact['fecha']);
+            $sheet->setCellValue('C'.$rowNumber, $fact['cliente']);
+            $sheet->setCellValue('D'.$rowNumber, $fact['servicio']);
+            $sheet->setCellValue('E'.$rowNumber, $fact['total']);
+            $rowNumber++;
         }
+
+        // 5) Ajustar anchos de columna (opcional)
+        foreach (['A','B','C','D','E'] as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // 6) Cabeceras HTTP para forzar la descarga como .xls
+        header('Content-Type: application/vnd.ms-excel'); 
+        header('Content-Disposition: attachment;filename="facturas.xls"');
+        header('Cache-Control: max-age=0');
+
+        // 7) Generamos el archivo y lo enviamos al navegador
+        //    Usamos la clase Xls para generar un archivo .xls
+        $writer = new Xls($spreadsheet);
+        $writer->save('php://output');
+        exit;
     }
 
-    // Filtrar facturas por fecha (mostrar formulario y resultado)
+    // Filtrar facturas por fecha (formulario y resultado)
     public function filterDate() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $startDate = $_POST['start_date'];
@@ -110,7 +129,6 @@ class FacturaController extends BaseController {
             $facturas = $factura->filterByDateRange($startDate, $endDate);
             $this->renderView('factura/index', ['facturas' => $facturas]);
         } else {
-            // Mostramos el formulario de filtro
             $this->renderView('factura/filterDate');
         }
     }
